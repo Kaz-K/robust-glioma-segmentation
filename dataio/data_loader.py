@@ -6,6 +6,7 @@ from dataio.transforms import ToTensor
 from dataio.transforms import RandomIntensityShiftScale
 from dataio.transforms import RandomAxisMirrorFlip
 from dataio.transforms import RandomCropVolume
+from dataio.transforms import StaticCropVolume
 
 
 def get_data_loader(mode, dataset_name, root_dir_path, patient_ids,
@@ -25,7 +26,7 @@ def get_data_loader(mode, dataset_name, root_dir_path, patient_ids,
 
     elif mode == 'val':
         TRANSFORM = [
-            RandomCropVolume(volume_size),
+            StaticCropVolume(volume_size),
             ToTensor(),
         ]
         shuffle = False

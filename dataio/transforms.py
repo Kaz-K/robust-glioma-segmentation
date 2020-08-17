@@ -94,3 +94,42 @@ class RandomCropVolume(object):
         })
 
         return sample
+
+
+class StaticCropVolume(object):
+
+    def __init__(self, volume_size):
+        self.volume_size = volume_size
+
+    def __call__(self, sample):
+        image = sample['image']
+        label = sample['label']
+
+        assert image.shape[1:] == label.shape
+
+        x_src, y_src, z_src = image.shape[1:]
+        x_dst, y_dst, z_dst = self.volume_size
+
+        assert x_src >= x_dst
+        assert y_src >= y_dst
+        assert z_src >= z_dst
+
+        xs = (x_src - x_dst) // 2
+        ys = (y_src - y_dst) // 2
+        zs = (z_src - z_dst) // 2
+
+        image = image[:,
+                      xs: xs + x_dst,
+                      ys: ys + y_dst,
+                      zs: zs + z_dst]
+
+        label = label[xs: xs + x_dst,
+                      ys: ys + y_dst,
+                      zs: zs + z_dst]
+
+        sample.update({
+            'image': image,
+            'label': label,
+        })
+
+        return sample
