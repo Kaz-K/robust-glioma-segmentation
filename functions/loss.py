@@ -53,6 +53,8 @@ class FocalLoss(nn.Module):
         self.ignore_index = ignore_index
         self.reduction = reduction
 
+        self.criterion = nn.BCELoss(reduction='none')
+
     def forward(self, output, target):
         # output: (B, C, H, W, D)
         # target: (B, C, H, W, D)
@@ -66,11 +68,11 @@ class FocalLoss(nn.Module):
                 continue
 
             os = output[:, i, ...].clone()
-            os = os.view(batch_size, -1).clamp(min=self.epsilon)
+            os = os.view(batch_size, -1).clamp(min=self.epsilon, max=1-self.epsilon)
             ts = target[:, i, ...].clone()
             ts = ts.view(batch_size, -1).float()
 
-            logpt = torch.log(os)
+            logpt = ts * torch.log(os)  # + (1 - ts) * torch.log(1 - os)
             pt = torch.exp(logpt)
 
             if self.alpha:

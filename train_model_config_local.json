@@ -2,21 +2,21 @@
   "run": {
     "use_cuda": true,
     "n_epochs": 500,
-    "visible_devices": "0, 1, 2, 3"
+    "visible_devices": "0"
   },
   "train_dataset": {
     "dataset_name": "MICCAIBrats2019Dataset",
     "root_dir_path": "./data/MICCAI_BraTS_2019_Data_Training",
-    "batch_size": 4,
-    "num_workers": 4,
-    "volume_size": [160, 192, 128]
+    "batch_size": 1,
+    "num_workers": 0,
+    "volume_size": [32, 32, 32]
   },
   "val_dataset": {
     "dataset_name": "MICCAIBrats2019Dataset",
     "root_dir_path": "./data/MICCAI_BraTS_2019_Data_Training",
-    "batch_size": 4,
-    "num_workers": 4,
-    "volume_size": [160, 192, 128]
+    "batch_size": 1,
+    "num_workers": 0,
+    "volume_size": [32, 32, 32]
   },
   "model": {
     "input_dim": 4,

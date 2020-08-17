@@ -4,7 +4,7 @@ import argparse
 import numpy as np
 from functools import partial
 import matplotlib
-matplotlib.use("tkagg")
+matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
 import torch
@@ -158,7 +158,7 @@ def main(config, needs_save):
         l_focal = focal_loss(output, target)
         l_active_contour = active_contour_loss(output, target)
 
-        l_total = l_dice + l_focal + l_active_contour
+        l_total = l_dice # + l_focal + l_active_contour
         l_total.backward()
 
         optimizer.step()
@@ -283,11 +283,23 @@ def main(config, needs_save):
             label = label.long()
 
         with torch.no_grad():
-            output = model(image)
+            pred = model(image)
+
+        output = torch.ones_like(label)
+
+        mask_0 = pred[:, 0, ...] < 0.5
+        mask_1 = pred[:, 1, ...] < 0.5
+        mask_2 = pred[:, 2, ...] < 0.5
+        mask = mask_0 * mask_1 * mask_2
+
+        pred = pred.argmax(1)
+        output += pred
+
+        output[mask] = 0
 
         image = image.detach().cpu().float()
         label = label.detach().cpu().unsqueeze(1).float()
-        output = output.argmax(dim=1, keepdim=True).detach().cpu().float()
+        output = output.detach().cpu().unsqueeze(1).float()
 
         z_middle = image.shape[-1] // 2
         image = image[:, 0, ..., z_middle]
