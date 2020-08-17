@@ -25,6 +25,7 @@ class Normalize(nn.Module):
 
 
 class ConvBlock(nn.Module):
+
     def __init__(self, in_channels, out_channels):
         super().__init__()
 
@@ -49,6 +50,7 @@ class ConvBlock(nn.Module):
 
 
 class UpBlock(nn.Module):
+
     def __init__(self, in_channels, out_channels):
         super().__init__()
 
@@ -63,6 +65,7 @@ class UpBlock(nn.Module):
 
 
 class ResUNet(nn.Module):
+
     def __init__(self, input_dim=4, output_dim=3, filters=[32, 64, 128, 256]):
         super().__init__()
 
@@ -117,4 +120,4 @@ class ResUNet(nn.Module):
         x = self.dec_block_0(x)
         x = self.dec_end(x)
         x = self.sigmoid(x)
-        return x 
+        return x

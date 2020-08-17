@@ -4,6 +4,7 @@ import numpy as np
 
 
 class ToTensor(object):
+
     def __call__(self, sample):
         image = sample['image']
         label = sample['label']
@@ -20,6 +21,7 @@ class ToTensor(object):
 
 
 class RandomIntensityShiftScale(object):
+
     def __call__(self, sample):
         image = sample['image']
 
@@ -37,6 +39,7 @@ class RandomIntensityShiftScale(object):
 
 
 class RandomAxisMirrorFlip(object):
+
     def __call__(self, sample):
         image = sample['image']
         label = sample['label']
@@ -55,6 +58,7 @@ class RandomAxisMirrorFlip(object):
 
 
 class RandomCropVolume(object):
+    
     def __init__(self, volume_size):
         self.volume_size = volume_size
 
