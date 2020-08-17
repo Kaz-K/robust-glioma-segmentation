@@ -132,3 +132,21 @@ class ActiveContourLoss(nn.Module):
             loss /= n_count
 
         return loss
+
+
+class OneHotEncoder(nn.Module):
+    def __init__(self, n_classes):
+        super().__init__()
+
+        self.n_classes = n_classes
+        self.ones = torch.sparse.torch.eye(n_classes).cuda()
+
+    def forward(self, t):
+        n_dim = t.dim()
+        output_size = t.size() + torch.Size([self.n_classes])
+
+        t = t.data.long().contiguous().view(-1).cuda()
+        out = Variable(self.ones.index_select(0, t)).view(output_size)
+        out = out.permute(0, -1, *range(1, n_dim)).float()
+
+        return out
