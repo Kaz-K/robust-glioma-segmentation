@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 import numpy as np
 
 
@@ -24,8 +25,10 @@ class SoftDiceLoss(nn.Module):
             if self.ignore_index is not None and i == self.ignore_index:
                 continue
 
-            os = output[:, i, ...].view(batch_size, -1)
-            ts = target[:, i, ...].view(batch_size, -1).float()
+            os = output[:, i, ...].clone()
+            os = os.view(batch_size, -1)
+            ts = target[:, i, ...].clone()
+            ts = ts.view(batch_size, -1).float()
 
             inter = (os * ts).sum()
             union = os.sum() + ts.sum()
@@ -41,16 +44,15 @@ class SoftDiceLoss(nn.Module):
 
 
 class FocalLoss(nn.Module):
+    epsilon = 1e-10
 
-    def __init__(self, gamma=0, alpha=None, ignore_index=None, reduction='mean'):
+    def __init__(self, gamma=2, alpha=None, ignore_index=None, reduction='mean'):
         super().__init__()
         self.gamma = gamma
         self.alpha = alpha
         self.ignore_index = ignore_index
         self.reduction = reduction
 
-        self.criterion = nn.BCELoss(reduction='none')
-
     def forward(self, output, target):
         # output: (B, C, H, W, D)
         # target: (B, C, H, W, D)
@@ -63,31 +65,35 @@ class FocalLoss(nn.Module):
             if self.ignore_index is not None and i == self.ignore_index:
                 continue
 
-            os = output[:, i, ...].view(batch_size, -1)
-            ts = target[:, i, ...].view(batch_size, -1).float()
+            os = output[:, i, ...].clone()
+            os = os.view(batch_size, -1).clamp(min=self.epsilon)
+            ts = target[:, i, ...].clone()
+            ts = ts.view(batch_size, -1).float()
 
-            logpt = self.criterion(os, ts)
-            pt = torch.exp(log_pt)
+            logpt = torch.log(os)
+            pt = torch.exp(logpt)
 
             if self.alpha:
                 logpt *= self.alpha
 
-            loss += - ((1 - pt) ** self.gamma) * logpt
+            val = - ((1 - pt) ** self.gamma) * logpt
+            loss += val.mean()
             n_count += 1
 
         if self.reduction == 'mean':
             loss /= n_count
-            loss /= batch_size
 
         return loss
 
 
 class ActiveContourLoss(nn.Module):
 
-    def __init__(self, weight=10, epsilon=1e-8, ignore_index=None, reduction='mean'):
+    def __init__(self, weight=1, epsilon=1e-8, ignore_index=None, reduction='mean'):
         super().__init__()
         self.weight = weight
         self.epsilon = epsilon
+        self.ignore_index = ignore_index
+        self.reduction = reduction
 
     def forward(self, output, target):
         # output: (B, C, H, W, D)
@@ -101,8 +107,8 @@ class ActiveContourLoss(nn.Module):
             if self.ignore_index is not None and i == self.ignore_index:
                 continue
 
-            os = output[:, i, ...]
-            ts = target[:, i, ...]
+            os = output[:, i, ...].clone()
+            ts = target[:, i, ...].clone()
 
             os[os >= 0.5] = 1
             os[os < 0.5] = 0
@@ -135,7 +141,7 @@ class ActiveContourLoss(nn.Module):
 
 
 class OneHotEncoder(nn.Module):
-    
+
     def __init__(self, n_classes):
         super().__init__()
 

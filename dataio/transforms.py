@@ -50,15 +50,15 @@ class RandomAxisMirrorFlip(object):
                 label = np.flip(label, axis=i-1)
 
         sample.update({
-            'image': image,
-            'label': label,
+            'image': image.copy(),
+            'label': label.copy(),
         })
 
         return sample
 
 
 class RandomCropVolume(object):
-    
+
     def __init__(self, volume_size):
         self.volume_size = volume_size
 

@@ -39,12 +39,12 @@ def get_data_loader(mode, dataset_name, root_dir_path, patient_ids,
     dataset = MICCAIBrats2019Dataset(
         root_dir_path=root_dir_path,
         patient_ids=patient_ids,
-        transform=TRANSFORM,
+        transform=transforms.Compose(TRANSFORM),
     )
 
     return data.DataLoader(
         dataset,
         batch_size=batch_size,
         shuffle=shuffle,
-        num_workers=num_workers, 
+        num_workers=num_workers,
     )

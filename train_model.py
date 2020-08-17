@@ -45,12 +45,18 @@ def divide_patients(root_dir_path, ratio=0.8):
     return train_patient_ids, val_patient_ids
 
 
+def adjust_learning_rate(optimizer, epoch, initial_lr, n_epochs, gamma=0.9):
+    lr = initial_lr * (1 - (epoch / n_epochs)) ** gamma
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
+
 def main(config, needs_save):
 
     if config.run.visible_devices:
         os.environ['CUDA_VISIBLE_DEVICES'] = config.run.visible_devices
 
-    assert config.train_dataset.root_dir_path == config.test_dataset.root_dir_path
+    assert config.train_dataset.root_dir_path == config.val_dataset.root_dir_path
     train_patient_ids, val_patient_ids = divide_patients(config.train_dataset.root_dir_path)
 
     seed = check_manual_seed()
@@ -120,10 +126,16 @@ def main(config, needs_save):
     )
 
     one_hot_encoder = OneHotEncoder(
-        n_classes=config.metric.n_classes,
+        n_classes=config.metric.n_classes + 1,
     ).forward
 
     def train(engine, batch):
+        adjust_learning_rate(optimizer,
+                             engine.state.epoch,
+                             initial_lr=config.optimizer.lr,
+                             n_epochs=config.run.n_epochs,
+                             gamma=config.optimizer.gamma)
+
         model.train()
 
         image = batch['image']
@@ -140,7 +152,7 @@ def main(config, needs_save):
         optimizer.zero_grad()
 
         output = model(image)
-        target = one_hot_encoder(label).detach()
+        target = one_hot_encoder(label)[:, 1:, ...]
 
         l_dice = dice_loss(output, target)
         l_focal = focal_loss(output, target)
@@ -182,7 +194,7 @@ def main(config, needs_save):
 
         with torch.no_grad():
             output = model(image)
-            target = one_hot_encoder(label).detach()
+            target = one_hot_encoder(label)[:, 1:, ...]
 
             l_dice = dice_loss(output, target)
             l_focal = focal_loss(output, target)
@@ -305,7 +317,7 @@ def main(config, needs_save):
     if needs_save:
         trainer.add_event_handler(event_name=Events.EPOCH_COMPLETED,
                                   handler=checkpoint_handler,
-                                  to_save={'model': model})
+                                  to_save={'model': model, 'optim': optimizer})
 
     timer.attach(trainer, start=Events.EPOCH_STARTED, resume=Events.ITERATION_STARTED,
                  pause=Events.ITERATION_COMPLETED, step=Events.ITERATION_COMPLETED)
@@ -315,3 +327,15 @@ def main(config, needs_save):
     )
 
     trainer.run(train_data_loader, config.run.n_epochs)
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Segmentation boilerplate')
+    parser.add_argument('-c', '--config', help='config file', required=True)
+    parser.add_argument('-s', '--save', help='save logs', action='store_true')
+    args = parser.parse_args()
+
+    config = load_json(args.config)
+
+    main(config, args.save)
