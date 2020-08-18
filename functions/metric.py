@@ -16,12 +16,26 @@ class DiceCoefficient(object):
         self.ignore_index = ignore_index
         self.index_to_class_name = index_to_class_name
 
-    def update(self, output, target):
-        batch_size = output.shape[0]
+    def update(self, pred, label):
+        batch_size = pred.shape[0]
 
-        output = self.one_hot_encoder(torch.argmax(output, dim=1))
+        output = torch.ones_like(label)
+
+        mask_0 = pred[:, 0, ...] < 0.5
+        mask_1 = pred[:, 1, ...] < 0.5
+        mask_2 = pred[:, 2, ...] < 0.5
+        mask = mask_0 * mask_1 * mask_2
+
+        pred = pred.argmax(1)
+        output += pred
+        output[mask] = 0
+
+        output = self.one_hot_encoder(output)
         output = output.contiguous().view(batch_size, self.n_classes, -1)
-        target = target.view(batch_size, self.n_classes, -1)
+
+        target = self.one_hot_encoder(label)
+        target = target.contiguous().view(batch_size, self.n_classes, -1)
+
         assert output.shape == target.shape
 
         dice = {}
@@ -42,4 +56,4 @@ class DiceCoefficient(object):
             else:
                 dice[str(i)] = score.item()
 
-        return dice 
+        return dice

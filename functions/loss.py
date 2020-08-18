@@ -44,7 +44,7 @@ class SoftDiceLoss(nn.Module):
 
 
 class FocalLoss(nn.Module):
-    epsilon = 1e-5
+    epsilon = 1e-8
 
     def __init__(self, gamma=2, alpha=None, ignore_index=None, reduction='mean'):
         super().__init__()
@@ -80,13 +80,13 @@ class FocalLoss(nn.Module):
 
             val = - ((1 - pt_pos) ** self.gamma) * logpt_pos
 
-            logpt_neg = (1 - ts) * torch.log(1 - os)
-            pt_neg = torch.exp(logpt_neg)
-
-            if self.alpha:
-                logpt_neg *= self.alpha
-
-            val += - ((1 - pt_neg) ** self.gamma) * logpt_neg
+            # logpt_neg = (1 - ts) * torch.log(1 - os)
+            # pt_neg = torch.exp(logpt_neg)
+            #
+            # if self.alpha:
+            #     logpt_neg *= self.alpha
+            #
+            # val += - ((1 - pt_neg) ** self.gamma) * logpt_neg
 
             loss += val.mean()
             n_count += 1

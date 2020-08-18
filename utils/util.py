@@ -9,7 +9,7 @@ import datetime
 def load_json(path):
     def _json_object_hook(d):
         for k, v in d.items():
-            d[k] = None if v is False else v 
+            d[k] = None if v is False else v
         return collections.namedtuple('X', d.keys())(*d.values())
     def _json_to_obj(data):
         return json.loads(data, object_hook=_json_object_hook)
@@ -23,9 +23,14 @@ def check_manual_seed(seed=None):
     return seed
 
 
-def get_output_dir_path(config):
+def get_output_dir_path(config, i=None):
     study_time = datetime.datetime.now().strftime('%b%d_%H-%M-%S')
-    dir_name = config.save.study_name + '_' + study_time
+
+    if i is None:
+        dir_name = config.save.study_name + '_' + study_time
+    else:
+        dir_name = config.save.study_name + '_' + str(i) + '_' + study_time
+
     output_dir_path = os.path.join(
         config.save.output_root_dir, dir_name
     )

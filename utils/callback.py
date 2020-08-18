@@ -57,13 +57,13 @@ def save_images_via_plt(image, label, output, n_save_images, config, save_path):
         plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
 
         plt.subplot(n_columns, 3, 2 + 3 * (i - 1))
-        plt.imshow(label[i - 1, ...], vmin=0, vmax=config.save.n_classes, cmap='jet')
+        plt.imshow(label[i - 1, ...], vmin=config.save.label_vmin, vmax=config.save.label_vmax, cmap='jet')
         plt.tick_params(bottom=False, left=False, right=False, top=False)
         plt.tick_params(labelbottom=False, labelleft=False, labelright=False, labeltop=False)
         plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
 
         plt.subplot(n_columns, 3, 3 + 3 * (i - 1))
-        plt.imshow(output[i - 1, ...], vmin=0, vmax=config.save.n_classes, cmap='jet')
+        plt.imshow(output[i - 1, ...], vmin=config.save.label_vmin, vmax=config.save.label_vmax, cmap='jet')
         plt.tick_params(bottom=False, left=False, right=False, top=False)
         plt.tick_params(labelbottom=False, labelleft=False, labelright=False, labeltop=False)
         plt.subplots_adjust(left=0, right=1, bottom=0, top=1)

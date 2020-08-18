@@ -1,7 +1,7 @@
 {
   "run": {
     "use_cuda": true,
-    "n_epochs": 500,
+    "n_epochs": 300,
     "visible_devices": "0, 1, 2, 3"
   },
   "train_dataset": {
@@ -39,20 +39,22 @@
     "weight": 1
   },
   "metric": {
-    "n_classes": 3
+    "n_classes": 4
   },
   "save": {
     "study_name": "baseline",
     "save_epoch_interval": 1,
     "output_root_dir": "./result",
     "n_save_images": 8,
-    "n_classes": 3,
-    "vmin": false,
-    "vmax": false
+    "label_vmin": 0,
+    "label_vmax": 3,
+    "image_vmin": false,
+    "image_vmax": false
   },
   "label_to_id": {
-    "NET": 0,
-    "ED": 1,
-    "ET": 2
+    "Background": 0,
+    "NET": 1,
+    "ED": 2,
+    "ET": 3
   }
 }

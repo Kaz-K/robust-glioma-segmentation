@@ -1,19 +1,3 @@
-"""
-Performs z-score normalization.
-Each modality of each patient independently by subtracting the mean and
-dividing by the standard deviation of the brain region.
-    T1: t1_normed_{normalization_type}.npy
-    T1CE: t1ce_normed_{normalization_type}.npy
-    T2: t2_normed_{normalization_type}.npy
-    FLAIR: flair_normed_{normalization_type}.npy
-
-    SEG: seg_normed.npy
-        0: Background
-        1: NCR/NET (non-enhancing tumor core)
-        2: ED (peritumoral edema)
-        3: ET (GD-enhancing tumor)
-"""
-
 import os
 import numpy as np
 import nibabel as nib

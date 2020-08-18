@@ -6,6 +6,7 @@ from functools import partial
 import matplotlib
 matplotlib.use("agg")
 import matplotlib.pyplot as plt
+from sklearn.model_selection import KFold
 
 import torch
 import torch.nn as nn
@@ -45,19 +46,29 @@ def divide_patients(root_dir_path, ratio=0.8):
     return train_patient_ids, val_patient_ids
 
 
+def get_cv_splits(root_dir_path, i):
+    all_patients = os.listdir(root_dir_path)
+    kf = KFold(n_splits=5, shuffle=False, random_state=None)
+    train_index, val_index = list(kf.split(all_patients))[i]
+    train_patient_ids = [all_patients[i] for i in list(train_index)]
+    val_patient_ids = [all_patients[i] for i in list(val_index)]
+    return train_patient_ids, val_patient_ids
+
+
 def adjust_learning_rate(optimizer, epoch, initial_lr, n_epochs, gamma=0.9):
     lr = initial_lr * (1 - (epoch / n_epochs)) ** gamma
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
 
-def main(config, needs_save):
+def main(config, needs_save, i):
 
     if config.run.visible_devices:
         os.environ['CUDA_VISIBLE_DEVICES'] = config.run.visible_devices
 
     assert config.train_dataset.root_dir_path == config.val_dataset.root_dir_path
-    train_patient_ids, val_patient_ids = divide_patients(config.train_dataset.root_dir_path)
+    # train_patient_ids, val_patient_ids = divide_patients(config.train_dataset.root_dir_path)
+    train_patient_ids, val_patient_ids = get_cv_splits(config.train_dataset.root_dir_path, i)
 
     seed = check_manual_seed()
     print('Using seed: {}'.format(seed))
@@ -126,7 +137,7 @@ def main(config, needs_save):
     )
 
     one_hot_encoder = OneHotEncoder(
-        n_classes=config.metric.n_classes + 1,
+        n_classes=config.metric.n_classes,
     ).forward
 
     def train(engine, batch):
@@ -158,12 +169,12 @@ def main(config, needs_save):
         l_focal = focal_loss(output, target)
         l_active_contour = active_contour_loss(output, target)
 
-        l_total = l_dice # + l_focal + l_active_contour
+        l_total = l_dice + l_focal + l_active_contour
         l_total.backward()
 
         optimizer.step()
 
-        m_dice = dice_coeff.update(output.detach(), target)
+        m_dice = dice_coeff.update(output.detach(), label)
 
         measures = {
             'SoftDiceLoss': l_dice.item(),
@@ -200,7 +211,7 @@ def main(config, needs_save):
             l_focal = focal_loss(output, target)
             l_active_contour = active_contour_loss(output, target)
 
-            m_dice = dice_coeff.update(output.detach(), target)
+            m_dice = dice_coeff.update(output.detach(), label)
 
         measures = {
             'SoftDiceLoss': l_dice.item(),
@@ -215,7 +226,7 @@ def main(config, needs_save):
 
         return measures
 
-    output_dir_path = get_output_dir_path(config)
+    output_dir_path = get_output_dir_path(config, i)
     trainer = Engine(train)
     evaluator = Engine(evaluate)
     timer = Timer(average=True)
@@ -306,13 +317,13 @@ def main(config, needs_save):
         label = label[:, 0, ..., z_middle]
         output = output[:, 0, ..., z_middle]
 
-        if config.save.vmax is not None:
-            vmax = config.save.vmax
+        if config.save.image_vmax is not None:
+            vmax = config.save.image_vmax
         else:
             vmax = image.max()
 
-        if config.save.vmin is not None:
-            vmin = config.save.vmin
+        if config.save.image_vmin is not None:
+            vmin = config.save.image_vmin
         else:
             vmin = image.min()
 
@@ -346,8 +357,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Segmentation boilerplate')
     parser.add_argument('-c', '--config', help='config file', required=True)
     parser.add_argument('-s', '--save', help='save logs', action='store_true')
+    parser.add_argument('-i', '--i', help='i-th hold for 5-cv', default=0)
     args = parser.parse_args()
 
     config = load_json(args.config)
 
-    main(config, args.save)
+    main(config, args.save, int(args.i))
