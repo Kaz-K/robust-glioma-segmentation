@@ -357,7 +357,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Segmentation boilerplate')
     parser.add_argument('-c', '--config', help='config file', required=True)
     parser.add_argument('-s', '--save', help='save logs', action='store_true')
-    parser.add_argument('-i', '--i', help='i-th hold for 5-cv', default=0)
+    parser.add_argument('-i', '--i', help='i-th fold for 5-cv', default=0)
     args = parser.parse_args()
 
     config = load_json(args.config)
