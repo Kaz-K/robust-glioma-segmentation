@@ -2,3 +2,5 @@
 __pycache__
 /result
 run.sh
+__old__
+train_model_config_local.json
