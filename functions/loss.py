@@ -38,7 +38,6 @@ class SoftDiceLoss(nn.Module):
 
         if self.reduction == 'mean':
             loss /= n_count
-            loss /= batch_size
 
         return loss
 
