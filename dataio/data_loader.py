@@ -38,6 +38,7 @@ def get_data_loader(mode, dataset_name, root_dir_path, patient_ids,
         shuffle = False
 
     dataset = MICCAIBrats2019Dataset(
+        mode=mode,
         root_dir_path=root_dir_path,
         patient_ids=patient_ids,
         transform=transforms.Compose(TRANSFORM),

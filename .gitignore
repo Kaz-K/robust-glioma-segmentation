@@ -4,3 +4,4 @@ __pycache__
 run*
 __old__
 train_model_config_local.json
+/saved_models

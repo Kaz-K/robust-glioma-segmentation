@@ -7,15 +7,22 @@ class ToTensor(object):
 
     def __call__(self, sample):
         image = sample['image']
-        label = sample['label']
 
         if image.ndim == 3:
             image = image[np.newaxis, ...]
 
-        sample.update({
-            'image': torch.from_numpy(image).float(),
-            'label': torch.from_numpy(label).int(),
-        })
+        if 'label' in sample.keys():
+            label = sample['label']
+
+            sample.update({
+                'image': torch.from_numpy(image).float(),
+                'label': torch.from_numpy(label).int(),
+            })
+
+        else:
+            sample.update({
+                'image': torch.from_numpy(image).float(),
+            })
 
         return sample
 

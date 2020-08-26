@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 
 
 config = {
-    'root_dir_path': './data/MICCAI_BraTS_2019_Data_Training',
+    'root_dir_path': './data/MICCAI_BraTS_2019_Data_Validation',
     'modalities': [
         {'name': 'T1', 'pattern': 't1'},
         {'name': 'T1CE', 'pattern': 't1ce'},
         {'name': 'T2', 'pattern': 't2'},
         {'name': 'FLAIR', 'pattern': 'flair'},
-        {'name': 'SEG', 'pattern': 'seg'},
+        # {'name': 'SEG', 'pattern': 'seg'},
     ],
 }
 

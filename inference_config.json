@@ -1,0 +1,57 @@
+{
+  "run": {
+    "use_cuda": true,
+    "visible_devices": "12, 13, 14, 15"
+  },
+  "test_dataset": {
+    "dataset_name": "MICCAIBrats2019Dataset",
+    "root_dir_path": "./data/MICCAI_BraTS_2019_Data_Testing",
+    "batch_size": 1,
+    "num_workers": 1,
+    "volume_size": [128, 128, 128]
+  },
+  "model_1": {
+    "input_dim": 4,
+    "output_dim": 3,
+    "filters": [32, 64, 128, 256],
+    "saved_model": "./saved_models/baseline_checkpoint_20100_0.pt",
+    "init_type": "kaiming"
+  },
+  "model_2": {
+    "input_dim": 4,
+    "output_dim": 3,
+    "filters": [32, 64, 128, 256],
+    "saved_model": "./saved_models/baseline_checkpoint_20100_1.pt",
+    "init_type": "kaiming"
+  },
+  "model_3": {
+    "input_dim": 4,
+    "output_dim": 3,
+    "filters": [32, 64, 128, 256],
+    "saved_model": "./saved_models/baseline_checkpoint_20100_2.pt",
+    "init_type": "kaiming"
+  },
+  "model_4": {
+    "input_dim": 4,
+    "output_dim": 3,
+    "filters": [32, 64, 128, 256],
+    "saved_model": "./saved_models/baseline_checkpoint_20100_3.pt",
+    "init_type": "kaiming"
+  },
+  "model_5": {
+    "input_dim": 4,
+    "output_dim": 3,
+    "filters": [32, 64, 128, 256],
+    "saved_model": "./saved_models/baseline_checkpoint_20100_4.pt",
+    "init_type": "kaiming"
+  },
+  "label_to_id": {
+    "Background": 0,
+    "NET": 1,
+    "ED": 2,
+    "ET": 3
+  },
+  "save": {
+    "save_root_dir": "./MICCAI_BraTS_2019_Data_Testing"
+  }
+}
